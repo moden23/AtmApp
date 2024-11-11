@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Main Page</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <h2 class="dashboard-atm">ATM Dashboard</h2>
+    <div class="checkBalance-wrapper">
+      <div class="checkBalance-btn-wrapper">
+        <h3 class="check-balanace-label">Check Balance</h3>
+        <button onclick="checkBalance()" class="checkBalance-btn">
+          &#8594;
+        </button>
+      </div>
+      <label class="checkBalance-amount">Balance:</label>
+    </div>
+    <div class="withdraw-wrapper">
+      <h3 class="withdraw-label">Withdraw</h3>
+      <form class="form-withdraw">
+        <input type="number" class="withdraw-input" placeholder="Amount" />
+        <button onclick="withdraw(event)" class="withdraw-btn">&#8594;</button>
+      </form>
+    </div>
+    <div class="deposit-wrapper">
+      <h3 class="deposit-label">Deposit</h3>
+      <form class="form-deposit">
+        <input type="number" class="deposit-input" placeholder="Amount" />
+        <button onclick="deposit(event)" class="deposit-btn">&#8594;</button>
+      </form>
+    </div>
+
+    <div class="transfer-wrapper">
+      <h2 class="transfer-label">Transfer money</h2>
+      <form class="form-transfer">
+        <input
+          type="text"
+          class="transfer-input-to"
+          placeholder="Transfer To"
+        />
+        <div class="transfer-button-wrapper">
+          <input type="number" class="transfer-input" placeholder="Amount" />
+          <button onclick="transfer(event)" class="transfer-btn">
+            &#8594;
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      const acId = localStorage.getItem("acId");
+      console.log(acId);
+      async function checkBalance() {
+        // if (!acId) {
+        //   console.log("Account ID not found. Please log in again.");
+        //   return;
+        // }
+
+        const response = await fetch(`http://localhost:3000/balance/${acId}`);
+        console.log(response);
+        if (!response.ok) {
+          throw new Error(response.statusText);
+        }
+
+        const result = await response.json();
+
+        if (result.bal !== undefined) {
+          document.querySelector(
+            ".checkBalance-amount"
+          ).textContent = `Balance: ${result.bal}`;
+        } else {
+          console.log("Failed to retrieve balance.Please try again.");
+        }
+      }
+
+      async function withdraw(event) {
+        event.preventDefault();
+        const amount = document.querySelector(".withdraw-input").value;
+        const response = await fetch("http://localhost:3000/withdraw", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ acId, amount: parseFloat(amount) }),
+        });
+        const result = await response.json();
+        console.log(result.msg);
+        document.querySelector(".withdraw-input").value = "";
+        document.querySelector(".withdraw-input").placeholdder = "Amount";
+      }
+
+      async function deposit(event) {
+        event.preventDefault();
+        const amount = document.querySelector(".deposit-input").value;
+        const response = await fetch("http://localhost:3000/deposit", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ acId, amount: parseFloat(amount) }),
+        });
+        const result = await response.json();
+        document.querySelector(".deposit-input").value = "";
+        document.querySelector(".deposit-input").placeholdder = "Amount";
+        console.log(result.msg);
+      }
+
+      async function transfer(event) {
+        event.preventDefault();
+        const srcId = acId;
+        const destName = document.querySelector(".transfer-input-to").value;
+        const amount = document.querySelector(".transfer-input").value;
+        const response = await fetch("http://localhost:3000/transfer", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ srcId, destName, amount: parseFloat(amount) }),
+        });
+        const result = await response.json();
+        console.log(result.msg);
+        document.querySelector(".transfer-input-to").value = "";
+        document.querySelector(".transfer-input-to").placeholdder =
+          "Transfer To";
+        document.querySelector(".transfer-input").value = "";
+        document.querySelector(".transfer-input").placeholdder = "Amount";
+      }
+
+      window.addEventListener("beforeunload", function () {
+        localStorage.removeItem("acId");
+      });
+    </script>
+  </body>
+</html>

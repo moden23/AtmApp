@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+
+  <body>
+    <header class="header-login">
+      <h1>ATM APP</h1>
+    </header>
+    <form id="registerForm" class="login-form">
+      <div class="wrapper-inputs">
+        <div class="username-wrapper">
+          <input type="text" id="username" placeholder="Username" required />
+        </div>
+        <div class="password-wrapper">
+          <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            required
+          />
+        </div>
+        <div class="button-wrapper">
+          <button type="submit" class="register-btn">Register</button>
+        </div>
+      </div>
+    </form>
+
+    <script>
+      document
+        .getElementById("registerForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+
+          const response = await fetch("http://localhost:3000/create", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          });
+          console.log(username);
+
+          const result = await response.json();
+          console.log(result);
+          console.log(result.msg);
+
+          if (result.sts === "success") {
+            window.location.href = "index.html";
+          }
+        });
+    </script>
+  </body>
+</html>
